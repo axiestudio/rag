@@ -30,7 +30,7 @@ try:
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
-    print("⚠️  PyTorch not available - using fallback implementations")
+    logger.info("⚠️  PyTorch not available - using fallback implementations")
 
 try:
     from transformers import AutoTokenizer, AutoModel, pipeline
@@ -38,38 +38,52 @@ try:
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
     TRANSFORMERS_AVAILABLE = False
-    print("⚠️  Transformers not available - using OpenAI only")
+    logger.info("⚠️  Transformers not available - using OpenAI only")
 
 try:
     import faiss
     FAISS_AVAILABLE = True
 except ImportError:
     FAISS_AVAILABLE = False
-    print("⚠️  FAISS not available - using basic similarity search")
+    logger.info("⚠️  FAISS not available - using basic similarity search")
 
 try:
-    from sklearn.cluster import HDBSCAN, KMeans
-    from sklearn.manifold import UMAP
+    from sklearn.cluster import KMeans
     from sklearn.metrics.pairwise import cosine_similarity
     from sklearn.preprocessing import StandardScaler
+    # Try to import advanced clustering (optional)
+    try:
+        from sklearn.cluster import HDBSCAN
+        HDBSCAN_AVAILABLE = True
+    except ImportError:
+        HDBSCAN_AVAILABLE = False
+    
+    try:
+        from sklearn.manifold import UMAP
+        UMAP_AVAILABLE = True
+    except ImportError:
+        UMAP_AVAILABLE = False
+        
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
-    print("⚠️  Scikit-learn not available - using basic clustering")
+    HDBSCAN_AVAILABLE = False
+    UMAP_AVAILABLE = False
+    logger.info("⚠️  Scikit-learn not available - using basic clustering")
 
 try:
     import spacy
     SPACY_AVAILABLE = True
 except ImportError:
     SPACY_AVAILABLE = False
-    print("⚠️  spaCy not available - using pattern-based NLP")
+    logger.info("⚠️  spaCy not available - using pattern-based NLP")
 
 try:
     import networkx as nx
     NETWORKX_AVAILABLE = True
 except ImportError:
     NETWORKX_AVAILABLE = False
-    print("⚠️  NetworkX not available - using basic graph operations")
+    logger.info("⚠️  NetworkX not available - using basic graph operations")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -893,17 +907,24 @@ class NeuralProcessingCore:
         try:
             embeddings_array = np.array(embeddings)
             
-            # Dimensionality reduction with UMAP
-            if len(embeddings) > 50:  # Only for larger datasets
-                from sklearn.manifold import UMAP
+            # Dimensionality reduction with UMAP (if available)
+            if UMAP_AVAILABLE and len(embeddings) > 50:  # Only for larger datasets
                 reducer = UMAP(n_components=50, n_neighbors=15, min_dist=0.1, random_state=42)
                 reduced_embeddings = reducer.fit_transform(embeddings_array)
             else:
                 reduced_embeddings = embeddings_array
             
-            # Hierarchical clustering with HDBSCAN
-            clusterer = HDBSCAN(min_cluster_size=max(2, len(embeddings) // 20), min_samples=1)
-            cluster_labels = clusterer.fit_predict(reduced_embeddings)
+            # Hierarchical clustering with HDBSCAN (if available) or fallback to KMeans
+            if HDBSCAN_AVAILABLE:
+                clusterer = HDBSCAN(min_cluster_size=max(2, len(embeddings) // 20), min_samples=1)
+                cluster_labels = clusterer.fit_predict(reduced_embeddings)
+                clustering_algorithm = 'HDBSCAN+UMAP' if UMAP_AVAILABLE else 'HDBSCAN'
+            else:
+                # Fallback to KMeans clustering
+                n_clusters = min(max(2, len(embeddings) // 10), 10)
+                clusterer = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+                cluster_labels = clusterer.fit_predict(reduced_embeddings)
+                clustering_algorithm = 'KMeans+UMAP' if UMAP_AVAILABLE else 'KMeans'
             
             # Analyze clusters
             num_clusters = len(set(cluster_labels)) - (1 if -1 in cluster_labels else 0)
@@ -941,7 +962,7 @@ class NeuralProcessingCore:
             return {
                 'num_clusters': num_clusters,
                 'cluster_info': cluster_info,
-                'clustering_algorithm': 'HDBSCAN+UMAP'
+                'clustering_algorithm': clustering_algorithm
             }
             
         except Exception as e:

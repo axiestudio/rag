@@ -3,13 +3,23 @@ services:
     name: rag-file-processor
     env: python
     buildCommand: |
-      pip install -r requirements.txt
+      # Upgrade pip first
+      pip install --upgrade pip
+      # Install basic dependencies first
+      pip install flask flask-cors gunicorn werkzeug openai tiktoken supabase psycopg2-binary
+      pip install PyPDF2 python-docx pandas chardet langchain-text-splitters python-dotenv requests
+      pip install numpy asyncio-throttle scikit-learn scipy
+      # Install optional advanced packages (allow failures)
+      pip install sentence-transformers transformers textstat networkx || echo "Some advanced packages failed to install - using fallbacks"
+      # Install Node.js dependencies and build frontend
       npm ci
       npm run build
     startCommand: gunicorn web_server:app --bind 0.0.0.0:$PORT --workers 2 --timeout 300
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
+      - key: FLASK_ENV
+        value: production
     disk:
       name: rag-processor-disk
       mountPath: /tmp

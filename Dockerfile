@@ -17,7 +17,19 @@ WORKDIR /app
 
 # Install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Upgrade pip first
+RUN pip install --upgrade pip
+
+# Install core dependencies first (these must succeed)
+RUN pip install --no-cache-dir flask==3.0.0 flask-cors==4.0.0 gunicorn==22.0.0 werkzeug==3.0.1
+RUN pip install --no-cache-dir openai==1.12.0 tiktoken==0.6.0
+RUN pip install --no-cache-dir supabase==2.4.4 psycopg2-binary==2.9.9
+RUN pip install --no-cache-dir PyPDF2==3.0.1 python-docx==1.1.0 pandas==2.2.0
+RUN pip install --no-cache-dir chardet==5.2.0 langchain-text-splitters==0.0.1 python-dotenv==1.0.1 requests==2.31.0
+RUN pip install --no-cache-dir numpy==1.24.3 asyncio-throttle==1.0.2 scikit-learn==1.3.0 scipy==1.11.1
+
+# Install optional advanced packages (allow failures)
+RUN pip install --no-cache-dir sentence-transformers==2.2.2 transformers==4.30.0 textstat==0.7.3 networkx==3.1 || echo "Advanced packages failed - using fallbacks"
 
 # Frontend build stage
 FROM node:18-alpine as frontend
