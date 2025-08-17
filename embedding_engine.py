@@ -23,7 +23,8 @@ try:
     NEURAL_CORE_AVAILABLE = True
 except ImportError:
     NEURAL_CORE_AVAILABLE = False
-    print("⚠️  Neural core not available - using standard processing")
+    import logging
+    logging.getLogger(__name__).info("⚠️  Neural core not available - using standard processing")
 
 class ProcessingLevel(Enum):
     """Available processing levels"""

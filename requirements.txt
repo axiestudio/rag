@@ -29,20 +29,17 @@ requests==2.31.0
 numpy==1.24.3
 asyncio-throttle==1.0.2
 
-# Machine Learning for clustering and similarity
+# Machine Learning for clustering and similarity (basic versions)
 scikit-learn==1.3.0
 scipy==1.11.1
 
-# Advanced Neural Processing (Now Core Features!)
-torch==2.0.1
-transformers==4.30.0
+# Optional Advanced Neural Processing (deployment-friendly versions)
+# These will be installed if available, but won't break deployment if they fail
 sentence-transformers==2.2.2
-faiss-cpu==1.7.4
-spacy==3.6.0
+transformers==4.30.0
 textstat==0.7.3
 networkx==3.1
-umap-learn==0.5.3
-hdbscan==0.8.29
 
-# Optional: spaCy English model (install separately)
-# python -m spacy download en_core_web_sm
+# Note: Advanced packages like torch, faiss, hdbscan, umap-learn, and spacy
+# are now optional and handled with fallbacks in the code
+# This ensures deployment works even without these packages
