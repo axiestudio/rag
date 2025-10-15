@@ -3,7 +3,7 @@
  * Implements intelligent text segmentation without heavy ML dependencies
  */
 
-import { encoding_for_model } from 'js-tiktoken';
+import { encodingForModel } from 'js-tiktoken';
 
 export interface TextChunk {
   content: string;
@@ -40,9 +40,8 @@ export const DEFAULT_CHUNKING_OPTIONS: ChunkingOptions = {
  */
 function countTokens(text: string): number {
   try {
-    const encoding = encoding_for_model('text-embedding-3-small');
+    const encoding = encodingForModel('text-embedding-3-small');
     const tokens = encoding.encode(text);
-    encoding.free();
     return tokens.length;
   } catch (error) {
     // Fallback to approximate token count (1 token ≈ 4 characters)

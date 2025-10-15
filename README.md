@@ -1,27 +1,27 @@
-# 🧠 Public RAG File Processor
+# ⚡ Serverless RAG File Processor
 
-A secure, production-ready RAG (Retrieval-Augmented Generation) system with **REVOLUTIONARY NEURAL SUPREME PROCESSING** where users provide their own OpenAI and Supabase credentials to process documents and create searchable knowledge bases.
+A **100% client-side, serverless** RAG (Retrieval-Augmented Generation) system that runs entirely in your browser. No backend servers, no Python dependencies, no complex deployments - just pure JavaScript/TypeScript magic!
 
-## 🚀 **NEW: NEURAL SUPREME CORE SYSTEM**
+## 🚀 **SERVERLESS REVOLUTION**
 
-This RAG system now features **NEURAL SUPREME PROCESSING** with revolutionary AI capabilities:
+This RAG system has been completely rewritten to be **serverless-first**:
 
-1. **🧠 NEURAL SUPREME** - Revolutionary multi-head attention neural networks
-2. **🔍 Intelligent Processing** - Semantic categorization and smart retrieval
-3. **⚡ Enhanced Processing** - Batch processing with retry logic  
-4. **📝 Basic Processing** - Simple chunking (fallback)
+1. **⚡ Pure Client-Side** - Runs entirely in the browser
+2. **🔍 Intelligent Processing** - Smart text chunking and embedding generation
+3. **📱 Zero Backend** - No servers, no Python, no complex infrastructure
+4. **🌐 Deploy Anywhere** - Static hosting on Vercel, Netlify, GitHub Pages, etc.
 
-### 🧠 Neural Supreme Features
-- **🚀 Multi-Head Attention Networks**: Advanced transformer architecture for intelligent chunking
-- **🔗 Concept Graph Engine**: Neural-powered knowledge graphs with PageRank algorithms
-- **🎯 Multi-Modal Embedding Fusion**: Combines OpenAI, Sentence Transformers, and contextual models
-- **💾 Intelligent Caching System**: SQLite-backed caching with LRU and semantic similarity
-- **🔄 Adaptive Learning**: Real-time optimization and parameter adjustment
-- **⚡ Parallel Processing**: Thread pool execution with GPU acceleration
-- **🎨 Advanced Clustering**: HDBSCAN + UMAP for superior semantic grouping
-- **🧮 Real-Time Monitoring**: Comprehensive performance and quality metrics
-- **🎪 Neural Quality Prediction**: AI-powered chunk quality assessment
-- **🌟 Automatic Fallbacks**: Graceful degradation when advanced features unavailable
+### ⚡ Serverless Features
+- **🚀 Browser-Based Processing**: All file processing happens in your browser
+- **🔗 Direct API Integration**: Direct calls to OpenAI and Supabase APIs
+- **🎯 Smart Text Chunking**: Intelligent document segmentation without ML dependencies
+- **💾 Vector Storage**: Direct integration with Supabase vector database
+- **🔄 Real-Time Progress**: Live updates during processing
+- **⚡ Lightning Fast**: No server round-trips, instant responses
+- **🎨 Modern UI**: Beautiful, responsive React interface
+- **🧮 Cost Effective**: Only pay for OpenAI and Supabase usage
+- **🎪 Easy Deployment**: Deploy to any static hosting platform
+- **🌟 No Maintenance**: No servers to maintain or scale
 
 ## 🔒 Security Features
 
@@ -33,9 +33,13 @@ This RAG system now features **NEURAL SUPREME PROCESSING** with revolutionary AI
 
 ## 🚀 Live Demo
 
-Deploy to Railway with one click:
+Deploy to Vercel with one click:
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/your-template-id)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/serverless-rag)
+
+Or deploy to Netlify:
+
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/your-username/serverless-rag)
 
 ## 🚀 For Users
 
@@ -127,60 +131,48 @@ Documents → Neural Chunking → Hybrid Embeddings → Semantic Clustering → 
 ```bash
 # Clone the repository
 git clone <your-repo>
-cd rag-file-processor
+cd serverless-rag
 
-# Install Python dependencies (including neural processing)
-pip install -r requirements.txt
-
-# Setup advanced neural models (REQUIRED for Neural Supreme)
-python setup_advanced_models.py
-
-# Install Node.js dependencies (for frontend)
+# Install dependencies
 npm install
 
-# Start both backend and frontend in development
-npm run start:dev
-
-# Or start them separately:
-# Terminal 1: Start Python backend
-python web_server.py
-
-# Terminal 2: Start React frontend
+# Start development server
 npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
 ```
 
-### 🧠 Neural Supreme Setup
+### 🚀 Serverless Architecture
 
-For the ultimate AI processing experience:
+The system is built with modern web technologies:
 
-```bash
-# Install neural dependencies (now included in requirements.txt)
-pip install torch transformers sentence-transformers faiss-cpu spacy textstat networkx umap-learn hdbscan
+- **Frontend**: React + TypeScript + Vite
+- **File Processing**: Browser-native APIs (PDF.js, Mammoth, PapaParse)
+- **Text Chunking**: Custom TypeScript implementation with tiktoken
+- **Embeddings**: Direct OpenAI API calls from browser
+- **Vector Storage**: Direct Supabase integration
+- **Deployment**: Static hosting (Vercel, Netlify, etc.)
 
-# Download spaCy English model
-python -m spacy download en_core_web_sm
+### Deployment Options
 
-# Test the neural core system
-python embedding_test.py
+#### Vercel (Recommended)
+1. Connect your GitHub repository to Vercel
+2. Vercel will auto-detect the Vite app
+3. Deploy automatically on every push
 
-# Test neural core directly
-python neural_core.py
-```
+#### Netlify
+1. Connect your GitHub repository to Netlify
+2. Build command: `npm run build`
+3. Publish directory: `dist`
 
-### Deployment to Railway
-
-1. **Connect Your Repository**:
-   - Link your GitHub repository to Railway
-   - Railway will auto-detect the Python app
-
-2. **Environment Variables** (Optional):
-   - `FLASK_DEBUG=false` (for production)
-   - `PORT` (automatically set by Railway)
-   - The system uses user-provided credentials
-
-3. **Deploy**:
-   - Railway will automatically deploy your app
-   - Users can access it via the provided URL
+#### GitHub Pages
+1. Enable GitHub Pages in repository settings
+2. Use GitHub Actions for automatic deployment
+3. Build and deploy on every push to main branch
 
 ### Production Configuration
 
