@@ -7,13 +7,18 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start:dev": "concurrently \"python web_server.py\" \"npm run dev\"",
-    "start": "python web_server.py"
+    "start": "npm run preview"
   },
   "dependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "lucide-react": "^0.263.1"
+    "lucide-react": "^0.263.1",
+    "@supabase/supabase-js": "^2.39.0",
+    "openai": "^4.24.1",
+    "pdf-parse": "^1.1.1",
+    "mammoth": "^1.6.0",
+    "papaparse": "^5.4.1",
+    "js-tiktoken": "^1.0.7"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Brain, Loader2, MessageCircle, BookOpen, Target, TrendingUp } from 'lucide-react';
 import { useLanguage } from '../hooks/useLanguage';
+import { createRAGProcessor } from '../utils/ragProcessor';
 
 interface QueryResult {
   success: boolean;
@@ -64,20 +65,55 @@ const QueryInterface: React.FC<QueryInterfaceProps> = ({ credentials }) => {
     setResult(null);
 
     try {
-      const response = await fetch('/query', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          question: question.trim(),
-          category_filter: categoryFilter || undefined,
-          ...credentials
-        }),
+      // Create RAG processor with credentials
+      const ragProcessor = createRAGProcessor({
+        openaiApiKey: credentials.openai_api_key,
+        supabaseUrl: credentials.supabase_url,
+        supabaseServiceKey: credentials.supabase_service_key
       });
 
-      const data = await response.json();
-      setResult(data);
+      // Perform similarity search
+      const queryResult = await ragProcessor.query(question.trim(), {
+        limit: 5,
+        threshold: 0.7
+      });
+
+      if (queryResult.success) {
+        // Convert to expected format
+        const formattedResult: QueryResult = {
+          success: true,
+          question: question.trim(),
+          answer: queryResult.results.length > 0
+            ? `Found ${queryResult.results.length} relevant documents. Here are the most relevant excerpts:\n\n${queryResult.results.map((r, i) => `${i + 1}. ${r.content.substring(0, 200)}...`).join('\n\n')}`
+            : 'No relevant documents found for your query.',
+          confidence: queryResult.results.length > 0 ? queryResult.results[0].similarity : 0,
+          sources: queryResult.results.map(r => ({
+            source: r.source,
+            similarity_score: r.similarity,
+            content_preview: r.content.substring(0, 150) + '...',
+            metadata: {
+              category: 'general',
+              quality_score: r.similarity,
+              key_concepts: []
+            }
+          })),
+          context_used: queryResult.results.length,
+          query_analysis: {
+            type: 'similarity_search',
+            intent: 'search',
+            complexity: 'simple',
+            keywords: question.trim().split(' ').slice(0, 5)
+          },
+          retrieval_stats: {
+            total_matches: queryResult.totalResults,
+            avg_similarity: queryResult.results.length > 0 ? queryResult.results.reduce((sum, r) => sum + r.similarity, 0) / queryResult.results.length : 0,
+            categories_found: ['general']
+          }
+        };
+        setResult(formattedResult);
+      } else {
+        throw new Error(queryResult.error || 'Query failed');
+      }
     } catch (error) {
       setResult({
         success: false,

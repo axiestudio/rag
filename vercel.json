@@ -1,27 +1,20 @@
 {
   "builds": [
     {
-      "src": "web_server.py",
-      "use": "@vercel/python"
-    },
-    {
       "src": "package.json",
-      "use": "@vercel/node"
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "web_server.py"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/dist/$1"
+      "dest": "/index.html"
     }
   ],
-  "functions": {
-    "web_server.py": {
-      "maxDuration": 300
-    }
-  }
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite"
 }

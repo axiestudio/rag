@@ -1,17 +1,17 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { 
-  Upload, 
-  FileText, 
-  Database, 
-  CheckCircle, 
-  AlertCircle, 
-  Loader2, 
-  Brain, 
-  Zap, 
-  Settings, 
-  Key, 
-  Shield, 
-  Download 
+import {
+  Upload,
+  FileText,
+  Database,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+  Brain,
+  Zap,
+  Settings,
+  Key,
+  Shield,
+  Download
 } from 'lucide-react';
 import { useLanguage } from './hooks/useLanguage';
 import { usePWA } from './hooks/usePWA';
@@ -22,6 +22,7 @@ import CredentialsForm from './components/CredentialsForm.tsx';
 import SqlSetupModal from './components/SqlSetupModal.tsx';
 import PWAInstallButton from './components/PWAInstallButton.tsx';
 import QueryInterface from './components/QueryInterface.tsx';
+import { createRAGProcessor, type RAGProcessingResult } from './utils/ragProcessor';
 
 // Add install button in header
 const InstallButton: React.FC = () => {
@@ -65,6 +66,16 @@ interface ProcessingResult {
     total_chunks: number;
   };
   processing_errors?: string[];
+  stats?: {
+    filesProcessed: number;
+    documentsExtracted: number;
+    chunksCreated: number;
+    embeddingsGenerated: number;
+    documentsUploaded: number;
+    totalTokensUsed: number;
+    estimatedCost: number;
+    processingTimeMs: number;
+  };
 }
 
 interface Credentials {
@@ -82,6 +93,8 @@ function App() {
   const [credentials, setCredentials] = useState<Credentials | null>(null);
   const [showCredentials, setShowCredentials] = useState(false);
   const [showSqlSetup, setShowSqlSetup] = useState(false);
+  const [processingStage, setProcessingStage] = useState<string>('');
+  const [processingProgress, setProcessingProgress] = useState<number>(0);
 
   // Load credentials from localStorage on component mount
   useEffect(() => {
@@ -121,25 +134,43 @@ function App() {
 
     setIsProcessing(true);
     setResult(null);
+    setProcessingStage('');
+    setProcessingProgress(0);
 
     try {
-      const formData = new FormData();
-      files.forEach((file, index) => {
-        formData.append(`file_${index}`, file);
+      // Create RAG processor with credentials
+      const ragProcessor = createRAGProcessor({
+        openaiApiKey: credentials.openai_api_key,
+        supabaseUrl: credentials.supabase_url,
+        supabaseServiceKey: credentials.supabase_service_key
       });
 
-      // Add credentials to the request
-      formData.append('openai_api_key', credentials.openai_api_key);
-      formData.append('supabase_url', credentials.supabase_url);
-      formData.append('supabase_service_key', credentials.supabase_service_key);
+      // Process files using the new serverless implementation
+      const ragResult = await ragProcessor.processFiles(
+        files,
+        (stage: string, progress: number, details?: string) => {
+          setProcessingStage(stage);
+          setProcessingProgress(progress);
+          console.log(`${stage} - ${Math.round(progress * 100)}%`, details);
+        }
+      );
 
-      const response = await fetch('/process-files', {
-        method: 'POST',
-        body: formData,
-      });
+      // Convert RAG result to the expected format
+      const processedResult: ProcessingResult = {
+        success: ragResult.success,
+        message: ragResult.message,
+        files_processed: ragResult.stats.filesProcessed,
+        chunks_created: ragResult.stats.chunksCreated,
+        upload_stats: {
+          successful_uploads: ragResult.stats.documentsUploaded,
+          failed_uploads: ragResult.stats.chunksCreated - ragResult.stats.documentsUploaded,
+          total_chunks: ragResult.stats.chunksCreated
+        },
+        processing_errors: ragResult.errors,
+        stats: ragResult.stats
+      };
 
-      const data = await response.json();
-      setResult(data);
+      setResult(processedResult);
     } catch (error) {
       setResult({
         success: false,
@@ -148,6 +179,8 @@ function App() {
       });
     } finally {
       setIsProcessing(false);
+      setProcessingStage('');
+      setProcessingProgress(0);
     }
   };
 
@@ -297,7 +330,7 @@ function App() {
 
             {/* Processing Status */}
             {isProcessing && (
-              <ProcessingStatus />
+              <ProcessingStatus stage={processingStage} progress={processingProgress} />
             )}
 
             {/* Results */}
