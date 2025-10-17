@@ -21,8 +21,8 @@ import ResultsDisplay from './components/ResultsDisplay.tsx';
 import CredentialsForm from './components/CredentialsForm.tsx';
 import SqlSetupModal from './components/SqlSetupModal.tsx';
 import PWAInstallButton from './components/PWAInstallButton.tsx';
-import QueryInterface from './components/QueryInterface.tsx';
-import { createRAGProcessor, type RAGProcessingResult } from './utils/ragProcessor';
+
+import { createRAGProcessor, type RAGProcessingResult } from './core/ragOrchestrator';
 
 // Add install button in header
 const InstallButton: React.FC = () => {
@@ -74,7 +74,9 @@ interface ProcessingResult {
     documentsUploaded: number;
     totalTokensUsed: number;
     estimatedCost: number;
-    processingTimeMs: number;
+    totalProcessingTimeMs: number;
+    overallQualityScore: number;
+    recommendations: string[];
   };
 }
 
@@ -145,8 +147,8 @@ function App() {
         supabaseServiceKey: credentials.supabase_service_key
       });
 
-      // Process files using the new serverless implementation
-      const ragResult = await ragProcessor.processFiles(
+      // Process files using optimized parallel processing
+      const ragResult = await ragProcessor.processFilesParallel(
         files,
         (stage: string, progress: number, details?: string) => {
           setProcessingStage(stage);
@@ -159,15 +161,15 @@ function App() {
       const processedResult: ProcessingResult = {
         success: ragResult.success,
         message: ragResult.message,
-        files_processed: ragResult.stats.filesProcessed,
-        chunks_created: ragResult.stats.chunksCreated,
+        files_processed: ragResult.statistics.filesProcessed,
+        chunks_created: ragResult.statistics.chunksCreated,
         upload_stats: {
-          successful_uploads: ragResult.stats.documentsUploaded,
-          failed_uploads: ragResult.stats.chunksCreated - ragResult.stats.documentsUploaded,
-          total_chunks: ragResult.stats.chunksCreated
+          successful_uploads: ragResult.statistics.documentsUploaded,
+          failed_uploads: ragResult.statistics.chunksCreated - ragResult.statistics.documentsUploaded,
+          total_chunks: ragResult.statistics.chunksCreated
         },
         processing_errors: ragResult.errors,
-        stats: ragResult.stats
+        stats: ragResult.statistics
       };
 
       setResult(processedResult);
@@ -337,9 +339,6 @@ function App() {
             {result && (
               <ResultsDisplay result={result} />
             )}
-
-            {/* Query Interface */}
-            <QueryInterface credentials={credentials} />
 
             {/* Features */}
             <div className="grid md:grid-cols-4 gap-6">

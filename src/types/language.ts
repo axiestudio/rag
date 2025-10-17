@@ -131,6 +131,17 @@ export const translations: Translations = {
     // Additional PWA translations
     downloadApp: 'Download App',
     installForOffline: 'Install for offline access',
-    appInstalled: 'App installed successfully!'
+    appInstalled: 'App installed successfully!',
+
+    // Chat Interface
+    chatWithDocuments: 'Chat with Your Documents',
+    chatInterface: 'Chat Interface',
+    startConversation: 'Start a conversation by asking a question about your documents',
+    askQuestion: 'Ask a question about your documents...',
+    processingQuery: 'Processing your query...',
+    foundDocuments: 'I found {count} relevant document(s) that may help answer your question',
+    noDocumentsFound: 'I could not find any relevant documents matching your query. Please try rephrasing your question or check if your documents have been uploaded.',
+    sources: 'Sources',
+    similarity: 'Similarity'
   }
 };

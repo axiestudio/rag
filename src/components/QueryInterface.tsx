@@ -154,12 +154,42 @@ const QueryInterface: React.FC<QueryInterfaceProps> = ({ credentials }) => {
     );
   }
 
+  const exampleQueries = [
+    "What are the main topics discussed in the documents?",
+    "Summarize the key findings and recommendations",
+    "What are the most important points mentioned?",
+    "Find information about specific concepts or terms",
+    "What conclusions can be drawn from the content?"
+  ];
+
+  const handleExampleQuery = (query: string) => {
+    setQuestion(query);
+  };
+
   return (
     <div className="glass-effect-dark rounded-2xl p-8">
       <div className="flex items-center mb-6">
         <Brain className="w-6 h-6 text-white mr-3" />
         <h2 className="text-2xl font-semibold text-white">Smart RAG Query</h2>
       </div>
+
+      {/* Example Queries */}
+      {!result && (
+        <div className="mb-6 p-4 bg-black/20 border border-white/10 rounded-lg">
+          <h3 className="text-white font-medium mb-3">💡 Try these example queries:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {exampleQueries.map((query, index) => (
+              <button
+                key={index}
+                onClick={() => handleExampleQuery(query)}
+                className="text-left p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white/80 hover:text-white text-sm transition-colors"
+              >
+                "{query}"
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Query Input */}
       <div className="space-y-4 mb-6">

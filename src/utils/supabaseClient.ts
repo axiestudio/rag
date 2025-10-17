@@ -38,10 +38,24 @@ export interface UploadResult {
   uploadedIds: string[];
 }
 
+export interface UploadOptions {
+  batchSize: number;
+  maxConcurrency: number;
+  retryAttempts: number;
+  retryDelay: number;
+}
+
 export const DEFAULT_SEARCH_OPTIONS: SearchOptions = {
   limit: 10,
   threshold: 0.7,
   includeMetadata: true
+};
+
+export const DEFAULT_UPLOAD_OPTIONS: UploadOptions = {
+  batchSize: 100,
+  maxConcurrency: 3,
+  retryAttempts: 3,
+  retryDelay: 1000
 };
 
 /**
@@ -50,10 +64,17 @@ export const DEFAULT_SEARCH_OPTIONS: SearchOptions = {
 export class SupabaseVectorClient {
   private client: SupabaseClient;
   private tableName: string;
+  private uploadOptions: UploadOptions;
 
-  constructor(url: string, serviceKey: string, tableName = 'documents') {
+  constructor(
+    url: string,
+    serviceKey: string,
+    tableName = 'documents',
+    uploadOptions: Partial<UploadOptions> = {}
+  ) {
     this.client = createClient(url, serviceKey);
     this.tableName = tableName;
+    this.uploadOptions = { ...DEFAULT_UPLOAD_OPTIONS, ...uploadOptions };
   }
 
   /**
@@ -123,55 +144,74 @@ export class SupabaseVectorClient {
   }
 
   /**
-   * Upload embeddings to Supabase in batches
+   * Upload embeddings to Supabase with optimized batching and retry logic
    */
   async uploadEmbeddings(
     embeddings: EmbeddingResult[],
-    onProgress?: (progress: number, uploaded: number, total: number) => void
+    onProgress?: (progress: number, uploaded: number, total: number) => void,
+    customOptions?: Partial<UploadOptions>
   ): Promise<UploadResult> {
-    const batchSize = 50; // Supabase batch limit
+    const options = { ...this.uploadOptions, ...customOptions };
+    const batchSize = options.batchSize;
     const uploadedIds: string[] = [];
     const errors: string[] = [];
     let uploaded = 0;
     let failed = 0;
 
-    // Process in batches
+    // Process in batches with retry logic
     for (let i = 0; i < embeddings.length; i += batchSize) {
       const batch = embeddings.slice(i, i + batchSize);
-      
-      try {
-        // Prepare records for insertion
-        const records: Omit<DocumentRecord, 'id' | 'created_at'>[] = batch.map(emb => ({
-          content: emb.text,
-          embedding: emb.embedding,
-          source: emb.source,
-          metadata: {
-            ...emb.metadata,
-            original_index: emb.index
+
+      // Retry logic for each batch
+      let batchSuccess = false;
+      let retryCount = 0;
+
+      while (!batchSuccess && retryCount < options.retryAttempts) {
+        try {
+          // Prepare records for insertion
+          const records: Omit<DocumentRecord, 'id' | 'created_at'>[] = batch.map(emb => ({
+            content: emb.text,
+            embedding: emb.embedding,
+            source: emb.source,
+            metadata: {
+              ...emb.metadata,
+              original_index: emb.index
+            }
+          }));
+
+          const { data, error } = await this.client
+            .from(this.tableName)
+            .insert(records)
+            .select('id');
+
+          if (error) {
+            throw error;
           }
-        }));
 
-        const { data, error } = await this.client
-          .from(this.tableName)
-          .insert(records)
-          .select('id');
+          if (data) {
+            uploadedIds.push(...data.map(record => record.id));
+            uploaded += batch.length;
+            batchSuccess = true;
+          }
 
-        if (error) {
-          throw error;
+        } catch (error) {
+          retryCount++;
+          const errorMessage = `Batch ${Math.floor(i / batchSize) + 1} attempt ${retryCount} failed: ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }`;
+
+          if (retryCount >= options.retryAttempts) {
+            errors.push(errorMessage);
+            failed += batch.length;
+            console.error(errorMessage);
+          } else {
+            console.warn(`${errorMessage}, retrying...`);
+            // Exponential backoff
+            await new Promise(resolve =>
+              setTimeout(resolve, options.retryDelay * Math.pow(2, retryCount - 1))
+            );
+          }
         }
-
-        if (data) {
-          uploadedIds.push(...data.map(record => record.id));
-          uploaded += batch.length;
-        }
-
-      } catch (error) {
-        const errorMessage = `Batch ${Math.floor(i / batchSize) + 1} failed: ${
-          error instanceof Error ? error.message : 'Unknown error'
-        }`;
-        errors.push(errorMessage);
-        failed += batch.length;
-        console.error(errorMessage);
       }
 
       // Report progress

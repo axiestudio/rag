@@ -125,31 +125,134 @@ CREATE INDEX IF NOT EXISTS idx_documents_created_at ON documents (created_at);`;
               </div>
             )}
 
-            <div className="mt-6 p-4 bg-gray-800/50 border border-white/20 rounded-lg">
-              <p className="text-white/90 font-medium">✅ Success! Your RAG system is ready:</p>
-              <ul className="text-white/80 mt-2 space-y-1 text-sm">
+            <div className="mt-6 p-4 bg-green-900/30 border border-green-500/30 rounded-lg">
+              <p className="text-green-300 font-medium text-lg mb-3">✅ Processing Complete! Documents Ready for Main App:</p>
+              <ul className="text-green-200 mt-2 space-y-2 text-sm">
                 <li>• Files processed and stored in your Supabase vector database</li>
                 <li>• Embeddings generated using your OpenAI API</li>
-                <li>• Ready for semantic search and AI-powered retrieval</li>
-                <li>• Use the query functions to search your knowledge base</li>
+                <li>• Ready for integration with your main Langflow application</li>
+                <li>• Follow the configuration steps below to connect your main app</li>
               </ul>
             </div>
 
-            <div className="mt-6 p-4 bg-gray-800/50 border border-white/20 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-white/90 font-medium">📋 Database Schema (if needed):</h3>
-                <button
-                  onClick={() => copyToClipboard(sqlSchema)}
-                  className="flex items-center px-3 py-1 text-sm bg-black text-white border border-white/20 rounded hover:bg-white hover:text-black transition-colors"
-                >
-                  <Copy className="w-4 h-4 mr-1" />
-                  Copy SQL
-                </button>
+            {/* Complementary App Notice */}
+            <div className="mt-4 p-4 bg-blue-900/40 border border-blue-400/40 rounded-lg">
+              <div className="flex items-center mb-2">
+                <div className="w-3 h-3 bg-blue-400 rounded-full mr-3"></div>
+                <h4 className="text-blue-300 font-medium">This is a Complementary Processing Tool</h4>
               </div>
-              <p className="text-white/80 text-sm">
-                If you haven't set up your Supabase database yet, copy and run this SQL in your Supabase SQL editor.
+              <p className="text-blue-200 text-sm">
+                This application processes and uploads your documents to Supabase. To query and interact with your documents,
+                use your main Axie Studio application with the configuration settings provided below.
               </p>
             </div>
+
+            {/* Next Steps Section */}
+            <div className="mt-6 space-y-4">
+              <h3 className="text-xl font-semibold text-white mb-4">🚀 Next Steps - Integrate with Your Main Axie Studio App:</h3>
+
+              {/* Step 1: Main App Integration */}
+              <div className="p-4 bg-blue-900/30 border border-blue-500/30 rounded-lg">
+                <h4 className="text-blue-300 font-medium mb-2">1. Configure Your Main Axie Studio Application</h4>
+                <p className="text-blue-200 text-sm mb-3">
+                  Your documents are now processed and ready to be used in your main Axie Studio RAG application. Configure your Supabase Vector Store component:
+                </p>
+                <div className="bg-black/30 p-3 rounded border border-blue-500/20">
+                  <p className="text-blue-100 text-sm font-medium mb-2">Required Supabase Vector Store Settings:</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-blue-300">Supabase URL:</span>
+                      <p className="text-blue-200 font-mono text-xs">Use the same URL from your credentials</p>
+                    </div>
+                    <div>
+                      <span className="text-blue-300">Service Key:</span>
+                      <p className="text-blue-200 font-mono text-xs">Use the same service key from your credentials</p>
+                    </div>
+                    <div>
+                      <span className="text-blue-300">Query Name:</span>
+                      <p className="text-blue-200 font-mono text-xs bg-yellow-900/30 px-2 py-1 rounded">search_documents</p>
+                    </div>
+                    <div>
+                      <span className="text-blue-300">Parser Type:</span>
+                      <p className="text-blue-200 font-mono text-xs bg-green-900/30 px-2 py-1 rounded">STRING</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2: Component Configuration */}
+              <div className="p-4 bg-purple-900/30 border border-purple-500/30 rounded-lg">
+                <h4 className="text-purple-300 font-medium mb-2">2. Axie Studio Component Setup</h4>
+                <p className="text-purple-200 text-sm mb-3">
+                  Configure your Axie Studio components to work with the processed documents:
+                </p>
+                <div className="space-y-3">
+                  <div className="bg-black/30 p-3 rounded border border-purple-500/20">
+                    <p className="text-purple-100 text-sm font-medium mb-2">Component Configuration:</p>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-purple-300">OpenAI Embeddings:</span>
+                        <span className="text-purple-200 font-mono text-xs bg-purple-900/30 px-2 py-1 rounded">Same API key as used here</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-purple-300">Supabase Vector Store:</span>
+                        <span className="text-purple-200 font-mono text-xs bg-purple-900/30 px-2 py-1 rounded">Query Name: search_documents</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-purple-300">Parser Component:</span>
+                        <span className="text-purple-200 font-mono text-xs bg-green-900/30 px-2 py-1 rounded">Output Type: STRING</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-purple-300">Search Results:</span>
+                        <span className="text-purple-200 font-mono text-xs bg-blue-900/30 px-2 py-1 rounded">Connect to Parser input</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3: Database Schema */}
+              <div className="p-4 bg-gray-800/50 border border-white/20 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-white font-medium">3. Database Schema (if needed)</h4>
+                  <button
+                    onClick={() => copyToClipboard(sqlSchema)}
+                    className="flex items-center px-3 py-2 text-sm bg-gray-700 text-white border border-white/20 rounded hover:bg-gray-600 transition-colors"
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy SQL
+                  </button>
+                </div>
+                <p className="text-white/80 text-sm mb-3">
+                  If you haven't set up your Supabase database yet, copy and run this SQL in your Supabase SQL editor:
+                </p>
+                <div className="bg-black/50 p-3 rounded border border-white/10 overflow-x-auto">
+                  <pre className="text-green-300 text-xs font-mono whitespace-pre-wrap">
+{sqlSchema}
+                  </pre>
+                </div>
+              </div>
+
+              {/* Step 4: Testing & Validation */}
+              <div className="p-4 bg-orange-900/30 border border-orange-500/30 rounded-lg">
+                <h4 className="text-orange-300 font-medium mb-2">4. Test Your Integration</h4>
+                <p className="text-orange-200 text-sm mb-3">
+                  Verify your main Axie Studio app can access the processed documents:
+                </p>
+                <div className="bg-black/30 p-3 rounded border border-orange-500/20">
+                  <p className="text-orange-100 text-sm font-medium mb-2">Validation Steps:</p>
+                  <div className="text-orange-200 text-xs space-y-1">
+                    <p>• Open your main Axie Studio application</p>
+                    <p>• Configure Supabase Vector Store with Query Name: <span className="bg-yellow-900/30 px-1 rounded">search_documents</span></p>
+                    <p>• Set Parser output type to: <span className="bg-green-900/30 px-1 rounded">STRING</span></p>
+                    <p>• Test with a sample query to verify document retrieval</p>
+                    <p>• Check that search results are properly parsed as strings</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
           </>
         )}
 
